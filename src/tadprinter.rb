@@ -1,18 +1,53 @@
 
-# =====================================
-# ===== PUNTO 1: DSL e Impresión ======
-# =====================================
+# =======================================
+# ===== PUNTO 1: DSL e Impresión ✨ =====
+# =======================================
 
-module Document
-  attr_accessor :alumno, :estado
-  def initialize(alumno, estado)
-    @alumno = alumno
-    @estado = estado
+class Document
+  attr_accessor :tag_raiz
+  def initialize(bloque)
+    @tag_raiz = bloque
+  end
+
+  def xml
+    if @tag_raiz.nil?
+      puts "tag_raíz vacío..."
+    end
+    if @tag_raiz.respond_to?("each")
+
+    end
+
   end
 end
 
-module Tag
+class Tag
+  attr_accessor :label, :atributos, :hijos
+  # label: será alumno, telefono, estado
+  # atributos: serán nombre: "Matias", legajo "123456-7", "1234567890", es_regular: true, 3, 5.
+  # hijos: bloque de otro tag
+  def initialize(label, atributos, &hijos)
+    @label = label
+    @atributos = atributos
+    @hijos = hijos
+  end
 
+end
+
+class Atributo
+  attr_accessor :clave, :valor
+
+  def initialize(clave, valor)
+    @clave = clave
+    @valor = valor
+  end
+
+  def who_am_i
+    unless @clave.is_a?(String)
+      raise ArgumentError, "La clave debe ser un string"
+    end
+
+    puts "#{@clave}: #{@valor}"
+  end
 end
 
 # RESPETAR SINTAXIS como en la consigna.
