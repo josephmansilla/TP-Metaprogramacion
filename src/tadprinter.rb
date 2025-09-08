@@ -5,7 +5,7 @@
 
 class Document
   attr_accessor :tag_raiz
-  def initialize(bloque)
+  def initialize(&bloque)
     @tag_raiz = bloque
   end
 
@@ -13,10 +13,7 @@ class Document
     if @tag_raiz.nil?
       puts "tag_raíz vacío..."
     end
-    if @tag_raiz.respond_to?("each")
-
-    end
-
+    puts "<#{@tag_raiz} #{@tag_raiz.who_am_i}>\n</#{@tag_raiz}>"
   end
 end
 
@@ -31,22 +28,47 @@ class Tag
     @hijos = hijos
   end
 
+  def who_am_i
+
+    unless atributos.nil?
+      if atributos.respond_to?("each")
+        @atributos.each do |atributo|
+          puts "#{atributo.valor}= #{atributo.clave}"
+        end
+      end
+      unless atributos..respond_to?("each")
+        puts "#{@atributos.valor}= #{@atributos.clave}"
+      end
+    end
+
+  end
+
 end
 
 class Atributo
-  attr_accessor :clave, :valor
+  attr_accessor :valor, :clave
 
   def initialize(clave, valor)
-    @clave = clave
     @valor = valor
+    @clave = clave
   end
 
   def who_am_i
-    unless @clave.is_a?(String)
+    unless @valor.is_a?(String)
       raise ArgumentError, "La clave debe ser un string"
     end
 
-    puts "#{@clave}: #{@valor}"
+    puts "#{@valor}: #{@clave}"
+  end
+end
+
+
+documento = Document.new alumno nombre: "Matias", legajo: "123456-7" do
+  telefono { "1234567890 "}
+  estado es_regular: true do
+    finales_rendidos { 3 }
+    materias_aprobadas { 5 }
+    end
   end
 end
 
@@ -77,12 +99,17 @@ end
 module Alumno
   ✨Inline✨ {|campo| campo.downcase }
   attr_reader :nombre, :legajo, :estado
-  def initialize(nombre, legajo, telefono, estado)
+  def initialize(nombre, legajo, estado)
     @nombre = nombre
     @legajo = legajo
-    @telefono = telefono
     @estado = estado
   end
+end
+
+class Telefono
+  attr_accessor :telefono
+  def initialize(telefono)
+    @telefono = telefono
 end
 
 class Estado
