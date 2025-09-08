@@ -17,33 +17,73 @@ class Document
   end
 end
 
-class Tag
-  attr_accessor :label, :atributos, :hijos
+
+class Tag_Anexo
+  attr_reader :label, :attributes, :children
   # label: será alumno, telefono, estado
-  # atributos: serán nombre: "Matias", legajo "123456-7", "1234567890", es_regular: true, 3, 5.
-  # hijos: bloque de otro tag
-  def initialize(label, atributos, &hijos)
+  # attributes: serán nombre: "Matias", legajo "123456-7", "1234567890", es_regular: true, 3, 5.
+  # children: bloque de otro tag
+
+  def self.with_label(label)
+    new(label)
+  end
+
+  def initialize(label)
     @label = label
-    @atributos = atributos
-    @hijos = hijos
+    @attributes = {}
+    @children = []
   end
 
-  def who_am_i
+  def with_label(label)
+    @label = label
+    self
+  end
 
-    unless atributos.nil?
-      if atributos.respond_to?("each")
-        @atributos.each do |atributo|
-          puts "#{atributo.valor}= #{atributo.clave}"
-        end
-      end
-      unless atributos..respond_to?("each")
-        puts "#{@atributos.valor}= #{@atributos.clave}"
-      end
+  def with_attribute(label, value)
+    @attributes[label] = value
+    self
+  end
+
+  def with_child(child)
+    @children << child
+    self
+  end
+
+  def xml(level=0)
+    if children.empty?
+      "#{"\t" * level}<#{label}#{xml_attributes}/>"
+    else
+      "#{"\t" * level}<#{label}#{xml_attributes}>\n#{xml_children(level + 1)}\n#{"\t" * level}</#{label}>"
     end
-
   end
 
+  private
+
+  def xml_children(level)
+    self.children.map do |child|
+      if child.is_a? Tag
+        child.xml(level)
+      else
+        xml_value(child, level)
+      end
+    end.join("\n")
+  end
+
+  def xml_attributes
+    self.attributes.map do |name, value|
+      "#{name}=#{xml_value(value, 0)}"
+    end.xml_join(' ')
+  end
+
+  def xml_value(value, level)
+    "\t" * level + if value.is_a? String
+                     "\"#{value}\""
+                   else
+                     value.to_s
+                   end
+  end
 end
+
 
 class Atributo
   attr_accessor :valor, :clave
@@ -154,68 +194,7 @@ documento_manual.xml == documento_automatico.xml  # Esto debe cumplirse
 # ===== Anexo ======
 # ==================
 
-class Tag
-  attr_reader :label, :attributes, :children
 
-  def self.with_label(label)
-    new(label)
-  end
-
-  def initialize(label)
-    @label = label
-    @attributes = {}
-    @children = []
-  end
-
-  def with_label(label)
-    @label = label
-    self
-  end
-
-  def with_attribute(label, value)
-    @attributes[label] = value
-    self
-  end
-
-  def with_child(child)
-    @children << child
-    self
-  end
-
-  def xml(level=0)
-    if children.empty?
-      "#{"\t" * level}<#{label}#{xml_attributes}/>"
-    else
-      "#{"\t" * level}<#{label}#{xml_attributes}>\n#{xml_children(level + 1)}\n#{"\t" * level}</#{label}>"
-    end
-  end
-
-  private
-
-  def xml_children(level)
-    self.children.map do |child|
-      if child.is_a? Tag
-        child.xml(level)
-      else
-        xml_value(child, level)
-      end
-    end.join("\n")
-  end
-
-  def xml_attributes
-    self.attributes.map do |name, value|
-      "#{name}=#{xml_value(value, 0)}"
-    end.xml_join(' ')
-  end
-
-  def xml_value(value, level)
-    "\t" * level + if value.is_a? String
-                     "\"#{value}\""
-                   else
-                     value.to_s
-                   end
-  end
-end
 
 class Array
   def xml_join(separator)
@@ -251,3 +230,4 @@ Tag
   )
   .with_child(Tag.with_label('no_children'))
   .xml
+end
